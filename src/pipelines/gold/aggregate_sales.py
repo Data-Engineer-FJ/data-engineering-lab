@@ -1,18 +1,33 @@
 import pandas as pd
 
 def run():
-    print("📊 Generating sales_summary...")
+    print("📊 Generating sales summary...")
 
+    # -----------------------------------------
+    # 1. LOAD CLEAN DATA
+    # -----------------------------------------
     orders = pd.read_csv("data/silver/orders_clean.csv")
-    payments = pd.read_csv("data/silver/payments_clean.csv")
+    products = pd.read_csv("data/silver/products_clean.csv")
 
-    df = orders.merge(payments, on="order_id", how="left")
+    # -----------------------------------------
+    # 2. JOIN DATASETS
+    # -----------------------------------------
+    df = orders.merge(products, on="product_id", how="left")
 
-    summary = df.groupby("payment_method").agg(
-        total_orders=("order_id", "count"),
-        total_revenue=("amount", "sum")
+    # -----------------------------------------
+    # 3. BUSINESS LOGIC
+    # -----------------------------------------
+    df["total"] = df["quantity"] * df["price"]
+
+    # Agregación
+    result = df.groupby("product_name").agg(
+        total_sales=("total", "sum"),
+        total_orders=("order_id", "count")
     ).reset_index()
 
-    summary.to_csv("data/gold/sales_summary.csv", index=False)
+    # -----------------------------------------
+    # 4. SAVE GOLD DATA
+    # -----------------------------------------
+    result.to_csv("data/gold/sales_summary.csv", index=False)
 
-    print("✅ sales_summary.csv generated")
+    print("✅ sales_summary.csv generado")

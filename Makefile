@@ -1,15 +1,17 @@
 # ==========================================
-# DATA ENGINEERING LAB - PRO VERSION
+# DATA ENGINEERING LAB - PRO VERSION 🚀
 # ==========================================
 
 CLI=./de-cli
+PYTHON=PYTHONPATH=. python
 
 .PHONY: help init reset rebuild \
-        generate-data preview-data clean-data \
+        generate-data preview preview-bronze preview-silver preview-gold \
+        clean-data \
         bronze silver gold medallion dag \
-        bootstrap-pipelines remove-pipelines \
-        generate-diagram generate-medallion-diagram generate-dag \
-        create backup release version backup-full \
+        bootstrap-pipelines remove-pipelines clean-pipelines \
+        generate-dag \
+        version backup-full \
         tree clean
 
 
@@ -22,35 +24,37 @@ help:
 	@echo "🚀 DATA ENGINEERING LAB COMMANDS"
 	@echo ""
 	@echo "ENVIRONMENT"
-	@echo " make init                  -> Setup environment"
-	@echo " make reset                 -> Clean project (FULL reset)"
-	@echo " make rebuild               -> Reset + Init + Run pipeline"
+	@echo " make init              -> Setup environment"
+	@echo " make reset             -> Clean data (safe reset)"
+	@echo " make rebuild           -> Reset + Init"
 	@echo ""
 	@echo "DATA"
-	@echo " make generate-data         -> Generate test datasets"
-	@echo " make preview-data          -> Preview CSV data"
-	@echo " make clean-data            -> Remove datasets"
+	@echo " make generate-data     -> Generate test datasets"
+	@echo " make preview           -> Preview ALL pipeline data"
+	@echo " make preview-bronze    -> Preview Bronze"
+	@echo " make preview-silver    -> Preview Silver"
+	@echo " make preview-gold      -> Preview Gold"
 	@echo ""
 	@echo "PIPELINE"
-	@echo " make bronze                -> Run Bronze layer"
-	@echo " make silver                -> Run Silver (parallel)"
-	@echo " make gold                  -> Run Gold (parallel)"
-	@echo " make medallion             -> Run full pipeline"
-	@echo " make dag                   -> Run DAG pipeline (dependency aware)"
+	@echo " make bronze            -> Run Bronze layer"
+	@echo " make silver            -> Run Silver layer"
+	@echo " make gold              -> Run Gold layer"
+	@echo " make medallion         -> Run full pipeline"
+	@echo " make dag               -> Run DAG pipeline"
 	@echo ""
 	@echo "PIPELINE STRUCTURE"
-	@echo " make bootstrap-pipelines   -> Create pipeline structure"
-	@echo " make remove-pipelines      -> Remove pipelines"
+	@echo " make bootstrap-pipelines -> Create pipeline structure"
+	@echo " make clean-pipelines     -> Remove pipeline files (keep folders)"
 	@echo ""
 	@echo "DIAGRAMS"
-	@echo " make generate-dag          -> Generate DAG diagram"
+	@echo " make generate-dag      -> Generate DAG diagram"
 	@echo ""
 	@echo "VERSIONING"
-	@echo " make version               -> Save project snapshot"
+	@echo " make version           -> Save project snapshot"
 	@echo ""
 	@echo "UTILS"
-	@echo " make tree                  -> Show structure"
-	@echo " make clean                 -> Clean temp files"
+	@echo " make tree              -> Show structure"
+	@echo " make clean             -> Clean temp files"
 	@echo ""
 
 
@@ -72,20 +76,18 @@ init:
 
 
 reset:
-	@echo "🧹 FULL reset..."
+	@echo "🧹 Safe reset (data only)..."
 
-	rm -rf data
-	rm -rf venv
-	rm -rf __pycache__
-	rm -rf .pytest_cache
+	# Clean data only
+	rm -f data/bronze/*.csv
+	rm -f data/silver/*.csv
+	rm -f data/gold/*.csv
 
-	rm -rf src/pipelines/bronze
-	rm -rf src/pipelines/silver
-	rm -rf src/pipelines/gold
-
+	# Cache
+	rm -rf __pycache__ .pytest_cache
 	find . -name "*.pyc" -delete
 
-	@echo "✅ Project cleaned"
+	@echo "✅ Data cleaned (pipelines preserved)"
 
 
 rebuild: reset init
@@ -98,16 +100,47 @@ rebuild: reset init
 
 generate-data:
 	@echo "📊 Generating datasets..."
-	PYTHONPATH=. python scripts/generate_data.py
-
-
-preview-data:
-	@echo "📊 Preview data..."
-	csvlook data/bronze/customers.csv || true
+	$(PYTHON) scripts/generate_data.py
+	@echo "✅ Data generated in /data/bronze"
 
 
 clean-data:
+	@echo "🧹 Cleaning Bronze data..."
 	rm -f data/bronze/*.csv
+
+
+# ==========================================
+# PREVIEW (🔥 NUEVO)
+# ==========================================
+
+preview:
+	@echo "📊 FULL PIPELINE PREVIEW"
+
+	@echo "\n🥉 BRONZE"
+	@csvlook data/bronze/customers.csv | head -n 5 || true
+	@csvlook data/bronze/products.csv | head -n 5 || true
+
+	@echo "\n🥈 SILVER"
+	@csvlook data/silver/customers_clean.csv | head -n 5 || true
+	@csvlook data/silver/products_clean.csv | head -n 5 || true
+
+	@echo "\n🥇 GOLD"
+	@csvlook data/gold/revenue_by_country.csv | head -n 5 || true
+
+
+preview-bronze:
+	@echo "🥉 BRONZE DATA"
+	@csvlook data/bronze/customers.csv | head -n 10 || true
+
+
+preview-silver:
+	@echo "🥈 SILVER DATA"
+	@csvlook data/silver/customers_clean.csv | head -n 10 || true
+
+
+preview-gold:
+	@echo "🥇 GOLD DATA"
+	@csvlook data/gold/revenue_by_country.csv | head -n 10 || true
 
 
 # ==========================================
@@ -116,17 +149,17 @@ clean-data:
 
 bronze:
 	@echo "🥉 Bronze Layer..."
-	PYTHONPATH=. python scripts/run_bronze.py
+	$(PYTHON) scripts/run_bronze.py
 
 
 silver:
 	@echo "🥈 Silver Layer..."
-	PYTHONPATH=. python scripts/run_silver.py
+	$(PYTHON) scripts/run_silver.py
 
 
 gold:
 	@echo "🥇 Gold Layer..."
-	PYTHONPATH=. python scripts/run_gold.py
+	$(PYTHON) scripts/run_gold.py
 
 
 medallion:
@@ -138,7 +171,7 @@ medallion:
 
 dag:
 	@echo "🚀 DAG execution..."
-	PYTHONPATH=. python scripts/run_dag.py
+	$(PYTHON) scripts/run_dag.py
 
 
 # ==========================================
@@ -147,12 +180,14 @@ dag:
 
 bootstrap-pipelines:
 	@echo "🏗 Creating pipelines..."
-	PYTHONPATH=. python scripts/bootstrap_pipelines.py
+	$(PYTHON) scripts/bootstrap_pipelines.py
 
 
-remove-pipelines:
-	@echo "🧹 Removing pipelines..."
-	rm -rf src/pipelines/bronze src/pipelines/silver src/pipelines/gold
+clean-pipelines:
+	@echo "🧹 Cleaning pipeline files (keeping structure)..."
+	rm -f src/pipelines/bronze/*.py
+	rm -f src/pipelines/silver/*.py
+	rm -f src/pipelines/gold/*.py
 
 
 # ==========================================
@@ -161,11 +196,11 @@ remove-pipelines:
 
 generate-dag:
 	@echo "📊 Generating DAG diagram..."
-	PYTHONPATH=. python scripts/generate_dag_diagram.py
+	$(PYTHON) scripts/generate_dag_diagram.py
 
 
 # ==========================================
-# VERSIONING (🔥 IMPORTANTE)
+# VERSIONING
 # ==========================================
 
 version:
