@@ -212,6 +212,24 @@ data/
 </p>
 <p align="lef"><i>Project structure</i></p>
 
+### 🔹 Tabla de datos Bronze
+<p align="lef">
+  <img src="docs/screenshots/Bronze.png" />
+</p>
+<p align="lef"><i>Table Bronze</i></p>
+
+### 🔹 Tabla de datos Silver
+<p align="lef">
+  <img src="docs/screenshots/Silver.png" />
+</p>
+<p align="lef"><i>Table Silver</i></p>
+
+### 🔹 Tabla de datos Gold
+<p align="lef">
+  <img src="docs/screenshots/Gold.png" />
+</p>
+<p align="lef"><i>Table Gold</i></p>
+
 ---
 
 ## 📦 Versionado
