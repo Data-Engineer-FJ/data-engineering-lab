@@ -238,7 +238,11 @@ versions/project_YYYYMMDD_HHMMSS.tar.gz
 
 ---
 
+---
+
 ## 👨‍💻 Autor
 
-Proyecto de práctica avanzada en Data Engineering Fredy Johel Peña A.
-Listo para entorno real 🚀
+Fredy Johel Peña A.  
+Data Engineer  
+
+🚀 Proyecto orientado a escenarios reales de ingeniería de datos
