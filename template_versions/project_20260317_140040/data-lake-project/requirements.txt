@@ -1,4 +1,0 @@
-pyspark
-pandas
-apache-airflow
-delta-spark

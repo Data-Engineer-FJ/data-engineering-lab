@@ -1,8 +1,0 @@
-pyspark
-pandas
-apache-airflow
-delta-spark
-faker
-csvkit
-graphviz
-diagrams

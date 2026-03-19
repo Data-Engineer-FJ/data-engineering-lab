@@ -1,9 +1,0 @@
-__pycache__/
-*.pyc
-.env
-.venv
-data/silver
-data/gold
-notebooks/.ipynb_checkpoints
-logs/
-.DS_Store
